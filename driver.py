@@ -25,8 +25,12 @@ sys.path.append(spark_path + "/python/lib/py4j-0.10.4-src.zip")
 from pyspark import SparkConf, SparkContext  # Spark 1 stuff
 from pyspark.sql import SparkSession  # Spark 2 stuff
 
+OUT = 'C:/Users/mramd/PycharmProjects/CS-GY 9223 - Programming in Big Data Analytics - Project'
 NAME = 'Air Travel Consumer Reports'
 DATA = 'C:/Users/mramd/Documents/CS-GY 9223 - Big Data Programming/Project/2002.csv'
+AIRP = 'C:/Users/mramd/Documents/CS-GY 9223 - Big Data Programming/Project/airports.csv'
+TAIL = 'C:/Users/mramd/Documents/CS-GY 9223 - Big Data Programming/Project/plane-data.csv'
+CARR = 'C:/Users/mramd/Documents/CS-GY 9223 - Big Data Programming/Project/carriers.csv'
 #DATA = 'C:/Users/mramd/Documents/CS-GY 9223 - Big Data Programming/Project/Air_Travel_Consumer_Reports.csv'
 HEAD = ['Year','Month','DayofMonth','DayOfWeek','DepTime','CRSDepTime','ArrTime',\
         'CRSArrTime','UniqueCarrier','FlightNum','TailNum','ActualElapsedTime',\
@@ -35,29 +39,90 @@ HEAD = ['Year','Month','DayofMonth','DayOfWeek','DepTime','CRSDepTime','ArrTime'
         'WeatherDelay','NASDelay','SecurityDelay','LateAircraftDelay']  # Note: header=True
 
 #sc = SparkContext('local', 'test')  # Spark 1 stuff
-spark = SparkSession.builder.master('local').appName(NAME).config('spark.executor.memory', '5g').getOrCreate()  # Spark 2 stuff
+spark = SparkSession.builder.master('local').appName(NAME).config('spark.executor.memory', '2g').getOrCreate()  # Spark 2 stuff
 df = spark.read.csv(DATA, header=True)
+df_airports = spark.read.csv(AIRP, header=True)
+df_plane_data = spark.read.csv(TAIL, header=True)
+df_carriers =  spark.read.csv(CARR, header=True)
 
 #df.select('Year','Month').show()  # Ideal
-df.registerTempTable('ATCR')  # Not necessary unless writing SQL in one line like in the following line.
+df.registerTempTable('ATCR')
+df_airports.registerTempTable('airports')
+df_plane_data.registerTempTable('planes')  # Might not have use for this
+df_carriers.registerTempTable('carriers')
 
 #test = spark.sql('select UniqueCarrier, sum(Distance) as SumDistance, sum(AirTime) as SumAirTime from ATCR group by UniqueCarrier')
 #test.coalesce(1).write.option('header', 'true').csv('C:/Users/mramd/PycharmProjects/CS-GY 9223 - Programming in Big Data Analytics - Project/test')
 #test.write.csv('C:/Users/mramd/PycharmProjects/CS-GY 9223 - Programming in Big Data Analytics - Project/test')
 #test.show()
 
-# Query to find the count of flight between source and destination for each month, each day, and day of week.
-# This data can be used to manage the traffic at airports so that it can be easily scalable.
-query_1 = spark.sql('select count(*) as FlightCount,' + HEAD[1] + ',' + HEAD[2] + ',' + HEAD[3] + ',' + HEAD[16] + ',' + HEAD[17]\
-                    + ' from ATCR group by ' + HEAD[1] + ',' + HEAD[2] + ',' + HEAD[3] + ',' + HEAD[16] + ',' + HEAD[17]\
-                    + ' order by ' + HEAD[1] + ',' + HEAD[2] + ',' + HEAD[3])
-print 'Showing query_1'
-query_1.coalesce(1).write.option('header', 'true').csv('C:/Users/mramd/PycharmProjects/CS-GY 9223 - Programming in Big Data Analytics - Project/query_1')
+for i in [0, 1, 2]:
+    # Query to find the count of flight between source and destination for each Year, Month, DayofMonth, DayOfWeek
+    query = spark.sql('select distinct count(*) as FlightCount,' + HEAD[i] + ',' + HEAD[16] + ',' + HEAD[17]\
+                        + ' from ATCR group by ' + HEAD[i] + ',' + HEAD[16] + ',' + HEAD[17]\
+                        + ' order by ' + HEAD[i])
+    query.coalesce(1).write.option('header', 'true').csv(OUT + 'query_' + str(i + 1))
 
-# Query to find delay in flight numbers. The idea is that this data can be used to track flight
-# record of airlines which are not providing good service and actions can be taken accordingly.
-query_2 = spark.sql('select * from ATCR where ' + HEAD[24] + ' > 0 order by ' + HEAD[24] + ' desc')
-print 'Showing query_2'
-query_2.coalesce(1).write.option('header', 'true').csv('C:/Users/mramd/PycharmProjects/CS-GY 9223 - Programming in Big Data Analytics - Project/query_2')
+# Where are most flights delayed?
+query_4 = spark.sql('select distinct sum(' + HEAD[24] + '),' + HEAD[16] + ',' + HEAD[17]\
+                    + ' from ATCR group by ' + HEAD[16] + ',' + HEAD[17] + ' order by ' + HEAD[24] + ' desc')
+query_4.coalesce(1).write.option('header', 'true').csv(OUT + '/query_4')
 
+for i in [0, 1, 2]:
+    # Query to find the total distance of flight between source and destination for each Year, Month, DayofMonth, DayOfWeek
+    query = spark.sql('select distinct count(*) as FlightDistance,' + HEAD[i]\
+                        + ' from ATCR group by ' + HEAD[i]\
+                        + ' order by FlightDistance desc')
+    query.coalesce(1).write.option('header', 'true').csv(OUT + '/query_' + str(i + 5))
+
+# Queries 8 to 15 will be used to see where people generally travel to seasonally - Do they head south during the winter?
+# Find the number of flights in the three months of Dec, Jan, and Feb for each year
+query_8 = spark.sql('select count(*) as FlightCount,' + HEAD[0] + ' from ATCR where ' + HEAD[1] + '==12 or ' + HEAD[1] + '==1 or ' + HEAD[1] + '==2'\
+                    + ' group by ' + HEAD[0] + ' order by FlightCount desc')
+query_8.coalesce(1).write.option('header', 'true').csv(OUT + '/query_8')
+
+# Find the number of flights in the three months of Mar, Apr, and May for each year
+query_9 = spark.sql('select count(*) as FlightCount,' + HEAD[0] + ' from ATCR where ' + HEAD[1] + '==3 or ' + HEAD[1] + '==4 or ' + HEAD[1] + '==5'\
+                    + ' group by ' + HEAD[0] + ' order by FlightCount desc')
+query_9.coalesce(1).write.option('header', 'true').csv(OUT + '/query_9')
+
+# Find the number of flights in the three months of Jun, Jul, and Aug for each year
+query_10 = spark.sql('select count(*) as FlightCount,' + HEAD[0] + ' from ATCR where ' + HEAD[1] + '==6 or ' + HEAD[1] + '==7 or ' + HEAD[1] + '==8'\
+                     + ' group by ' + HEAD[0] + ' order by FlightCount desc')
+query_10.coalesce(1).write.option('header', 'true').csv(OUT + '/query_10')
+
+# Find the number of flights in the three months of Sep, Oct, and Nov for each year
+query_11 = spark.sql('select count(*) as FlightCount,' + HEAD[0] + ' from ATCR where ' + HEAD[1] + '==9 or ' + HEAD[1] + '==10 or ' + HEAD[1] + '==11'\
+                     + ' group by ' + HEAD[0] + ' order by FlightCount desc')
+query_11.coalesce(1).write.option('header', 'true').csv(OUT + '/query_11')
+
+# Winter Travels
+query_12 = spark.sql('select distinct count(*) as FlightCount,' + HEAD[16] + ',' + HEAD[17]\
+                     + ' from ATCR where ' + HEAD[1] + '==12 or ' + HEAD[1] + '==1 or ' + HEAD[1] + '==2'\
+                     + ' group by ' + HEAD[0] + ' order by FlightCount desc')
+query_12.coalesce(1).write.option('header', 'true').csv(OUT + '/query_12')
+
+# Spring Travels
+query_13 = spark.sql('select distinct count(*) as FlightCount,' + HEAD[16] + ',' + HEAD[17]\
+                     + ' from ATCR where ' + HEAD[1] + '==3 or ' + HEAD[1] + '==4 or ' + HEAD[1] + '==5'\
+                     + ' group by ' + HEAD[0] + ' order by FlightCount desc')
+query_13.coalesce(1).write.option('header', 'true').csv(OUT + '/query_13')
+
+# Summer Travels
+query_14 = spark.sql('select distinct count(*) as FlightCount,' + HEAD[16] + ',' + HEAD[17]\
+                     + ' from ATCR where ' + HEAD[1] + '==6 or ' + HEAD[1] + '==7 or ' + HEAD[1] + '==8'\
+                     + ' group by ' + HEAD[0] + ' order by FlightCount desc')
+query_14.coalesce(1).write.option('header', 'true').csv(OUT + '/query_14')
+
+# Fall Travels
+query_15 = spark.sql('select distinct count(*) as FlightCount,' + HEAD[16] + ',' + HEAD[17]\
+                     + ' from ATCR where ' + HEAD[1] + '==9 or ' + HEAD[1] + '==10 or ' + HEAD[1] + '==11'\
+                     + ' group by ' + HEAD[0] + ' order by FlightCount desc')
+query_15.coalesce(1).write.option('header', 'true').csv(OUT + '/query_15')
+# End of Seasonal Analysis
+
+# select (avg(HEAD[14]) + avg(HEAD[15])) as Delay, DayOfWeek from ATCR group by DayOfWeek order by Delay
+# select (avg(HEAD[14]) + avg(HEAD[15])) as Delay, Month from ATCR group by Month order by Delay
+# select (avg(HEAD[14]) + avg(HEAD[15]) + avg(TaxiIn) + avg(TaxOut)) as Delay, DayOfWeek from ATCR group by DayOfWeek order by Delay
+# select (avg(HEAD[14]) + avg(HEAD[15]) + avg(TaxiIn) + avg(TaxOut)) as Delay, Month from ATCR group by Month order by Delay
 exit(0)
