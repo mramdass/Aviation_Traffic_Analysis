@@ -410,7 +410,7 @@ def query17():
                 'queries': {
                     'properties': {
                         'average-arrival-delay': {'type': 'double'},
-                        'carrier': {'type': 'string'}
+                        'flight-num': {'type': 'string'}
                     }
                 }
             }
@@ -422,7 +422,7 @@ def query17():
             try:
                 doc = {
                     'average-arrival-delay': float(line[0]),
-                    'carrier': carriers[line[1]]
+                    'flight-num': line[1]
                 }
                 yield {
                     "_index": 'query17',
@@ -442,7 +442,7 @@ def query18():
                 'queries': {
                     'properties': {
                         'average-departure-delay': {'type': 'double'},
-                        'carrier': {'type': 'string'}
+                        'flight-num': {'type': 'string'}
                     }
                 }
             }
@@ -454,7 +454,7 @@ def query18():
             try:
                 doc = {
                     'average-departure-delay': float(line[0]),
-                    'carrier': carriers[line[1]]
+                    'flight-num': line[1]
                 }
                 yield {
                     "_index": 'query18',
@@ -486,8 +486,8 @@ if __name__ == '__main__':
     '''
 
 
-    #query17()
-    #query18()
+    #success, _ = bulk(es, query18())
+    #success, _ = bulk(es, query18())
     #success, _ = bulk(es, query1())
     #success, _ = bulk(es, query3())
     #query4()
