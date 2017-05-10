@@ -51,10 +51,6 @@ df_airports.registerTempTable('airports')
 df_plane_data.registerTempTable('planes')  # Might not have use for this
 df_carriers.registerTempTable('carriers')
 
-#test = spark.sql('select UniqueCarrier, sum(Distance) as SumDistance, sum(AirTime) as SumAirTime from ATCR group by UniqueCarrier')
-#test.coalesce(1).write.option('header', 'true').csv('C:/Users/mramd/PycharmProjects/CS-GY 9223 - Programming in Big Data Analytics - Project/test')
-#test.write.csv('C:/Users/mramd/PycharmProjects/CS-GY 9223 - Programming in Big Data Analytics - Project/test')
-#test.show()
 
 for i in [0, 1, 2]:
     # Query to find the count of flight between source and destination for each Year, Month, DayofMonth, DayOfWeek
@@ -120,9 +116,3 @@ query_15 = spark.sql('select distinct count(*) as FlightCount,' + HEAD[16] + ','
                      + ' group by ' + HEAD[0] + ' order by FlightCount desc')
 query_15.coalesce(1).write.option('header', 'true').csv(OUT + '/query_15')
 # End of Seasonal Analysis
-
-# select (avg(HEAD[14]) + avg(HEAD[15])) as Delay, DayOfWeek from ATCR group by DayOfWeek order by Delay
-# select (avg(HEAD[14]) + avg(HEAD[15])) as Delay, Month from ATCR group by Month order by Delay
-# select (avg(HEAD[14]) + avg(HEAD[15]) + avg(TaxiIn) + avg(TaxOut)) as Delay, DayOfWeek from ATCR group by DayOfWeek order by Delay
-# select (avg(HEAD[14]) + avg(HEAD[15]) + avg(TaxiIn) + avg(TaxOut)) as Delay, Month from ATCR group by Month order by Delay
-exit(0)
