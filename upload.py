@@ -5,6 +5,7 @@ try:
     from json import dumps, loads, load, dump
     from itertools import islice, chain
     from elasticsearch import Elasticsearch, RequestsHttpConnection, serializer, compat, exceptions
+    from elasticsearch.helpers import bulk
 except Exception as e: print e
 
 # 1st Attribution: http://stackoverflow.com/questions/38209061/django-elasticsearch-aws-httplib-unicodedecodeerror/38371830
@@ -15,24 +16,14 @@ class JSONSerializerPython2(serializer.JSONSerializer):
         try: return dumps(data, default=self.default, ensure_ascii=True)
         except (ValueError, TypeError) as e: raise exceptions.SerializationError(data, e)
 
+# New endpoint
 es = Elasticsearch(
-    ['https://d998a9a6e15546abfebd8830763e1d74.us-east-1.aws.found.io'],
+    ['<>'],
     port=9243,
-    http_auth='elastic' + ":" + 'd3OMqrrnAx4UpP9o7eg00rvl',
+    http_auth='elastic' + ":" + '<>',
     serializer=JSONSerializerPython2(),
     ca_certs=certifi.where()
 )
-
-mapping = {
-    "FlightCount": {"type": "integer"},
-    "Month": {"type": "integer"},
-    "DayofMonth": {"type": "integer"},
-    "DayOfWeek": {"type": "integer"},
-    "Origin": {"type": "string"},
-    "Dest": {"type": "string"}
-}
-
-es.indices.create(index='sample', body=mapping, ignore=400)
 
 airports = {}
 carriers = {}
@@ -40,6 +31,7 @@ planes = {}
 
 def read_supporting_files(directory='C:/Users/mramd/Documents/CS-GY 9223 - Big Data Programming/Project/'):
     with open(directory + 'airports.csv', 'r') as r:
+        next(r)
         for line in reader(r):
             try:
                 airports[line[0]] = {
@@ -54,6 +46,7 @@ def read_supporting_files(directory='C:/Users/mramd/Documents/CS-GY 9223 - Big D
             except Exception as e:
                 print e
     with open(directory + 'carriers.csv', 'r') as r:
+        next(r)
         for line in reader(r):
             try: carriers[line[0]] = {'Code': line[0], 'Description': line[1]}
             except Exception as e: print e
@@ -64,6 +57,7 @@ read_supporting_files()
 res_dir = 'C:/Users/mramd/Documents/CS-GY 9223 - Big Data Programming/Project/Results/'
 def query1():  # Flights per month
     with open(res_dir + 'query1.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -78,7 +72,7 @@ def query1():  # Flights per month
                 }
             }
         }
-        es.indices.delete(index='query1', ignore=[400, 404])
+        #es.indices.delete(index='query1', ignore=[400, 404])
         es.indices.create(index='query1', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -91,13 +85,19 @@ def query1():  # Flights per month
                     'destination_coordinates': str(airports[line[3]]['lat']) + ', ' + str(airports[line[3]]['long']),
                     'origin_coordinates': str(airports[line[2]]['lat']) + ', ' + str(airports[line[2]]['long'])
                 }
-                es.index(index='query1', doc_type='query1', id=count, body=doc)
+                yield {
+                    "_index": 'query1',
+                    "_type": 'query1',
+                    "_source": doc
+                }
+                #es.index(index='query1', doc_type='query1', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
 
 def query3():  # Flights per weekday
     with open(res_dir + 'query3.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -112,7 +112,7 @@ def query3():  # Flights per weekday
                 }
             }
         }
-        es.indices.delete(index='query3', ignore=[400, 404])
+        #es.indices.delete(index='query3', ignore=[400, 404])
         es.indices.create(index='query3', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -125,7 +125,12 @@ def query3():  # Flights per weekday
                     'destination_coordinates': str(airports[line[3]]['lat']) + ', ' + str(airports[line[3]]['long']),
                     'origin_coordinates': str(airports[line[2]]['lat']) + ', ' + str(airports[line[2]]['long'])
                 }
-                es.index(index='query3', doc_type='query3', id=count, body=doc)
+                yield {
+                    "_index": 'query3',
+                    "_type": 'query3',
+                    "_source": doc
+                }
+                #es.index(index='query3', doc_type='query3', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
@@ -149,6 +154,7 @@ def query4():
 
 def query5():  # Count of delays/cancellation per month
     with open(res_dir + 'query5.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -161,7 +167,7 @@ def query5():  # Count of delays/cancellation per month
                 }
             }
         }
-        es.indices.delete(index='query5', ignore=[400, 404])
+        #es.indices.delete(index='query5', ignore=[400, 404])
         es.indices.create(index='query5', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -172,13 +178,19 @@ def query5():  # Count of delays/cancellation per month
                     'month': int(line[2]),
                     'count': int(line[3])
                 }
-                es.index(index='query5', doc_type='query5', id=count, body=doc)
+                yield {
+                    "_index": 'query5',
+                    "_type": 'query5',
+                    "_source": doc
+                }
+                #es.index(index='query5', doc_type='query5', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
 
 def query7():  # Origin/Dest Diverted
     with open(res_dir + 'query7.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -190,7 +202,7 @@ def query7():  # Origin/Dest Diverted
                 }
             }
         }
-        es.indices.delete(index='query7', ignore=[400, 404])
+        #es.indices.delete(index='query7', ignore=[400, 404])
         es.indices.create(index='query7', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -200,13 +212,19 @@ def query7():  # Origin/Dest Diverted
                     'destination': line[1],
                     'count': int(line[2])
                 }
-                es.index(index='query7', doc_type='query7', id=count, body=doc)
+                yield {
+                    "_index": 'query7',
+                    "_type": 'query7',
+                    "_source": doc
+                }
+                #es.index(index='query7', doc_type='query7', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
 
 def query8():  # Origin/Dest Cancelled
     with open(res_dir + 'query8.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -218,7 +236,7 @@ def query8():  # Origin/Dest Cancelled
                 }
             }
         }
-        es.indices.delete(index='query8', ignore=[400, 404])
+        #es.indices.delete(index='query8', ignore=[400, 404])
         es.indices.create(index='query8', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -228,7 +246,12 @@ def query8():  # Origin/Dest Cancelled
                     'destination': line[1],
                     'count': int(line[2])
                 }
-                es.index(index='query8', doc_type='query8', id=count, body=doc)
+                yield {
+                    "_index": 'query8',
+                    "_type": 'query8',
+                    "_source": doc
+                }
+                #es.index(index='query8', doc_type='query8', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
@@ -253,6 +276,7 @@ def query9_10_11_12():
 
 def query13():  # Winter destinations
     with open(res_dir + 'query13.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -263,7 +287,7 @@ def query13():  # Winter destinations
                 }
             }
         }
-        es.indices.delete(index='query13', ignore=[400, 404])
+        #es.indices.delete(index='query13', ignore=[400, 404])
         es.indices.create(index='query13', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -272,13 +296,19 @@ def query13():  # Winter destinations
                     'destination': line[0],
                     'count': int(line[1])
                 }
-                es.index(index='query13', doc_type='query13', id=count, body=doc)
+                yield {
+                    "_index": 'query13',
+                    "_type": 'query13',
+                    "_source": doc
+                }
+                #es.index(index='query13', doc_type='query13', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
 
 def query14():  # Spring destinations
     with open(res_dir + 'query14.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -289,7 +319,7 @@ def query14():  # Spring destinations
                 }
             }
         }
-        es.indices.delete(index='query14', ignore=[400, 404])
+        #es.indices.delete(index='query14', ignore=[400, 404])
         es.indices.create(index='query14', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -298,13 +328,19 @@ def query14():  # Spring destinations
                     'destination': line[0],
                     'count': int(line[1])
                 }
-                es.index(index='query14', doc_type='query14', id=count, body=doc)
+                yield {
+                    "_index": 'query14',
+                    "_type": 'query14',
+                    "_source": doc
+                }
+                #es.index(index='query14', doc_type='query14', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
 
 def query15():  # Summer destinations
     with open(res_dir + 'query15.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -315,7 +351,7 @@ def query15():  # Summer destinations
                 }
             }
         }
-        es.indices.delete(index='query15', ignore=[400, 404])
+        #es.indices.delete(index='query15', ignore=[400, 404])
         es.indices.create(index='query15', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -324,13 +360,19 @@ def query15():  # Summer destinations
                     'destination': line[0],
                     'count': int(line[1])
                 }
-                es.index(index='query15', doc_type='query15', id=count, body=doc)
+                yield {
+                    "_index": 'query15',
+                    "_type": 'query15',
+                    "_source": doc
+                }
+                #es.index(index='query15', doc_type='query15', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
 
 def query16():  # Autumn destinations
     with open(res_dir + 'query16.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -341,7 +383,7 @@ def query16():  # Autumn destinations
                 }
             }
         }
-        es.indices.delete(index='query16', ignore=[400, 404])
+        #es.indices.delete(index='query16', ignore=[400, 404])
         es.indices.create(index='query16', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -350,13 +392,19 @@ def query16():  # Autumn destinations
                     'destination': line[0],
                     'count': int(line[1])
                 }
-                es.index(index='query16', doc_type='query16', id=count, body=doc)
+                yield {
+                    "_index": 'query16',
+                    "_type": 'query16',
+                    "_source": doc
+                }
+                #es.index(index='query16', doc_type='query16', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
 
 def query17():
     with open(res_dir + 'query17.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -367,7 +415,7 @@ def query17():
                 }
             }
         }
-        es.indices.delete(index='query17', ignore=[400, 404])
+        #es.indices.delete(index='query17', ignore=[400, 404])
         es.indices.create(index='query17', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -376,13 +424,19 @@ def query17():
                     'average-arrival-delay': float(line[0]),
                     'carrier': carriers[line[1]]
                 }
-                es.index(index='query17', doc_type='query17', id=count, body=doc)
+                yield {
+                    "_index": 'query17',
+                    "_type": 'query17',
+                    "_source": doc
+                }
+                #es.index(index='query17', doc_type='query17', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
 
 def query18():
     with open(res_dir + 'query18.csv', 'r') as r:
+        next(r)
         query_mapping = {
             'mappings': {
                 'queries': {
@@ -393,7 +447,7 @@ def query18():
                 }
             }
         }
-        es.indices.delete(index='query18', ignore=[400, 404])
+        #es.indices.delete(index='query18', ignore=[400, 404])
         es.indices.create(index='query18', body=query_mapping, ignore=400)
         count = 1
         for line in reader(r):
@@ -402,31 +456,49 @@ def query18():
                     'average-departure-delay': float(line[0]),
                     'carrier': carriers[line[1]]
                 }
-                es.index(index='query18', doc_type='query18', id=count, body=doc)
+                yield {
+                    "_index": 'query18',
+                    "_type": 'query18',
+                    "_source": doc
+                }
+                #es.index(index='query18', doc_type='query18', id=count, body=doc)
                 count += 1
             except Exception as e:
                 print e
 
+
+
+
 if __name__ == '__main__':
+    
+    '''
+    es.indices.delete(index='query1', ignore=[400, 404])
+    es.indices.delete(index='query3', ignore=[400, 404])
+    es.indices.delete(index='query4', ignore=[400, 404])
+    es.indices.delete(index='query5', ignore=[400, 404])
+    es.indices.delete(index='query7', ignore=[400, 404])
+    es.indices.delete(index='query8', ignore=[400, 404])
+    es.indices.delete(index='query9_10_11_12', ignore=[400, 404])
+    es.indices.delete(index='query13', ignore=[400, 404])
+    es.indices.delete(index='query14', ignore=[400, 404])
+    es.indices.delete(index='query15', ignore=[400, 404])
+    es.indices.delete(index='query16', ignore=[400, 404])
+    '''
+
+
     #query17()
     #query18()
-    '''
-    p = []
-    p.append(threading.Thread(target=query1(), args=()))
-    p.append(threading.Thread(target=query3(), args=()))
-    p.append(threading.Thread(target=query4(), args=()))
-    p.append(threading.Thread(target=query5(), args=()))
-    p.append(threading.Thread(target=query7(), args=()))
-    p.append(threading.Thread(target=query8(), args=()))
-    p.append(threading.Thread(target=query9_10_11_12(), args=()))
-    p.append(threading.Thread(target=query13(), args=()))
-    p.append(threading.Thread(target=query14(), args=()))
-    p.append(threading.Thread(target=query15(), args=()))
-    p.append(threading.Thread(target=query16(), args=()))
-    p.append(threading.Thread(target=query17(), args=()))
-    p.append(threading.Thread(target=query18(), args=()))
-    for thread in p: thread.start()
-    for thread in p: thread.join()
-    '''
+    #success, _ = bulk(es, query1())
+    #success, _ = bulk(es, query3())
+    #query4()
+    #success, _ = bulk(es, query5())
+    #success, _ = bulk(es, query7())
+    #success, _ = bulk(es, query8())
+    #query9_10_11_12()
+    #success, _ = bulk(es, query13())
+    #success, _ = bulk(es, query14())
+    #success, _ = bulk(es, query15())
+    #success, _ = bulk(es, query16())
+
 
     print 'Done'
