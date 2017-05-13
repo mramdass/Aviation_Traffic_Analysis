@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<title>BIG DATA PROGRAMMING: Aviation Analysis</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body {font-family: "Lato", sans-serif}
+.mySlides {display: none}
+</style>
+<body>
+
+<!-- Page content -->
+<div class="w3-content" style="max-width:2000px;margin-top:46px">
+
+  <!-- Summary Section -->
+  <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="band">
+	  <h2 class="w3-wide">Aviation Analysis</h2>
+    <p class="w3-opacity"><i>For Airports, For People</i></p>
+
+	  <h2 class="w3-wide"></h2>
+	  <p class="w3-wide">Munieshwar (Kevin) Ramdass, Om Narayan</p>
+
+	  <h3 class="w3-wide">Summary</h3>
+    <p class="w3-justify">
+		We analyzed air traffic data from <b>Air Travel Consumer Reports</b>. We hope to provide a means to which
+airport traffic can be made scalable and manageable. To do so we analyzed plane departure
+and arrival on an hourly, daily, weekly, monthly, and annual basis to give a high level view of
+which seasons/periods are more busy or less busy. The analysis can be used to provide a smooth
+scalability for air traffic in the future by accommodating more flight intake and outgoing traffic with a higher
+number of destinations. The hope is that travellers can also view this data to plan their next flight or
+		enjoy some fun facts.
+	</p>
+
+	  <h3 class="w3-wide">Technology Used</h3>
+	  <div>
+		  <ul style="list-style-type:none">
+			  <li>Spark 2</li>
+			  <li>Python 2.7 (standalone and pySpark)</li>
+			  <li>Spark SQL</li>
+			  <li>Elasticsearch</li>
+			  <li>Hadooop (for testing purposes - not for submission)</li>
+			  <li>Pig Latin (for testing purposes - not for submission)</li>
+			</ul>
+	  </div>
+
+	  <h3 class="w3-wide">Key Points Detailed Here</h3>
+	  <ul style="list-style-type:none">
+			  <li>Airports can use this data to help Airport assess flight traffic.</li>
+			  <li>People can use this to choose flights wisely.</li>
+			  <li>Interesting discoveries.</li>
+			</ul>
+
+	  <h3 class="w3-wide">Architecture</h3>
+    <p class="w3-justify">
+		We used NYU HPC to run our analysis. NYU DUMBO has Spark. NYU Babar has HDFS. We
+		SSH into DUMBO and ran queries via Spark. Results saved on HDFS were then ported
+		to an Elasticsearch instance. From here we were able to generate visualizations.
+	</p>
+	  <p>Here is our <a href="https://www.draw.io/?lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=CS-GY%209223%20-%20Project%20Architecture.html#R7Vldc9o6EP01PLaDLZDJYyBJ05nbNlMm0%2BZR2MLWjbC4sgjQX9%2BVLflLpsNMnUK5cWaCfXb1dXaPJMsDNFvtPkiyTj6JiPKBP4x2A3Qz8P1J4MN%2FDewLYDQOCiCWLCogrwLm7Ac14NCgGxbRrOGohOCKrZtgKNKUhqqBESnFtum2FLzZ6prEpsVhBcxDwqnj9o1FKjHD8nGF31MWJ7ZlD18VlgUJn2MpNqlpb%2BCjZX4V5hWxdZl2s4REYluD0O0AzaQQqrhb7WaUa2otbbac2tu%2BDtA0USsODx7c5ua7A4W9YwrD6CRNVb25Q%2FX5gY%2Fw0sfjxRj7OETvxpOiihfCN7YFH3OobBqxl0bT%2BL%2BNHuRU0Z16RziL0wG6Bg%2BZ01qa4S42v3k12ZqkFvv89AgF7h9m1gg9rdtrcN66RVsc5OGikeFgmzBF52sSausWsrtJ0ZJxPhNcyLwsWo71H%2BBmBDdF96GfSopnWvPE%2BQUWThaUP4iMKSZ0iRDIpuA0faFSMcjBf1oOKxZFuq%2Blw7VpS4l1OR5to7tW9lZx9MrcAslSsaJK7sHFFBjZtDJy9UbmeVslP7I%2BST3xLUiM4OKy7ipt4MZkzpFZhN08pRHo0zxSvhDb2wqYVgEcNoNFd0x9r90%2FaZf3OlxAjNx%2FNyXyh8qWKSLVtZ5FAEpFSi12x%2FQYTJHIeoScZBkLC9C46Ab%2FpUrtzdRGNkoAJKRKRCxSiLHQscv9nEwZ5lcZWT30X8cVmBIbGdJDojRzEwwhpuoQ58PuDJGUE8Vemj3oNdq2e7U54%2Bbx0%2FRLrzqlXjSmwTE6vcIBIueqU9TS6cTVqdelU%2FwaMg1GPcvUSNMI1WvItFLtk6ngbGQakSwp07InzdqA%2FVqzk1Np1navptkpWRD5pllHs9g7J81i3wkcxEM%2BO4HT27JmdJqsG8HVQ2YgGy2He0ttyXlXOvQxSwZNxsu3ihrjow7CX2cvgxzC72%2Fu5pfENx6fE9%2Fjt71jj3tHPDpiHSp2cCdZh0aOumac6RGeeCHqQVbe1VktHNhh%2BsPjx1PT%2FGqrdpt81DGn%2FcGdtnvq85s77cOTmvc%2FmNSCIya1IuFPMqkFjtRugVJI9IwSGSYXK7r26%2B1pRWePdN9E14%2FoJseILjiZ6NyT6zm6WKW1X0pPvLx5DvdfabbhsIsbPkgRUsjsNHaC8Re%2FMjkzXceBeyf%2Fr%2FLOZL%2FW1fj%2FRhcAfNT0LPXgL4h7v537HdxP%2Fhj17vHAXAmpP09eEOXtE4Iuyns6IYDH6utpbqt9oUa3PwE%3D">Architecture</a>.</p>
+
+	  <p>
+		  And now for some <b>Visualizations</b>.
+	  </p>
+
+  </div>
+	<div>
+		<iframe height="800" width="1350" src="https://www.draw.io/?lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=CS-GY%209223%20-%20Project%20Architecture.html#R7Vldc9o6EP01PLaDLZDJYyBJ05nbNlMm0%2BZR2MLWjbC4sgjQX9%2BVLflLpsNMnUK5cWaCfXb1dXaPJMsDNFvtPkiyTj6JiPKBP4x2A3Qz8P1J4MN%2FDewLYDQOCiCWLCogrwLm7Ac14NCgGxbRrOGohOCKrZtgKNKUhqqBESnFtum2FLzZ6prEpsVhBcxDwqnj9o1FKjHD8nGF31MWJ7ZlD18VlgUJn2MpNqlpb%2BCjZX4V5hWxdZl2s4REYluD0O0AzaQQqrhb7WaUa2otbbac2tu%2BDtA0USsODx7c5ua7A4W9YwrD6CRNVb25Q%2FX5gY%2Fw0sfjxRj7OETvxpOiihfCN7YFH3OobBqxl0bT%2BL%2BNHuRU0Z16RziL0wG6Bg%2BZ01qa4S42v3k12ZqkFvv89AgF7h9m1gg9rdtrcN66RVsc5OGikeFgmzBF52sSausWsrtJ0ZJxPhNcyLwsWo71H%2BBmBDdF96GfSopnWvPE%2BQUWThaUP4iMKSZ0iRDIpuA0faFSMcjBf1oOKxZFuq%2Blw7VpS4l1OR5to7tW9lZx9MrcAslSsaJK7sHFFBjZtDJy9UbmeVslP7I%2BST3xLUiM4OKy7ipt4MZkzpFZhN08pRHo0zxSvhDb2wqYVgEcNoNFd0x9r90%2FaZf3OlxAjNx%2FNyXyh8qWKSLVtZ5FAEpFSi12x%2FQYTJHIeoScZBkLC9C46Ab%2FpUrtzdRGNkoAJKRKRCxSiLHQscv9nEwZ5lcZWT30X8cVmBIbGdJDojRzEwwhpuoQ58PuDJGUE8Vemj3oNdq2e7U54%2Bbx0%2FRLrzqlXjSmwTE6vcIBIueqU9TS6cTVqdelU%2FwaMg1GPcvUSNMI1WvItFLtk6ngbGQakSwp07InzdqA%2FVqzk1Np1navptkpWRD5pllHs9g7J81i3wkcxEM%2BO4HT27JmdJqsG8HVQ2YgGy2He0ttyXlXOvQxSwZNxsu3ihrjow7CX2cvgxzC72%2Fu5pfENx6fE9%2Fjt71jj3tHPDpiHSp2cCdZh0aOumac6RGeeCHqQVbe1VktHNhh%2BsPjx1PT%2FGqrdpt81DGn%2FcGdtnvq85s77cOTmvc%2FmNSCIya1IuFPMqkFjtRugVJI9IwSGSYXK7r26%2B1pRWePdN9E14%2FoJseILjiZ6NyT6zm6WKW1X0pPvLx5DvdfabbhsIsbPkgRUsjsNHaC8Re%2FMjkzXceBeyf%2Fr%2FLOZL%2FW1fj%2FRhcAfNT0LPXgL4h7v537HdxP%2Fhj17vHAXAmpP09eEOXtE4Iuyns6IYDH6utpbqt9oUa3PwE%3D"></iframe>
+
+	</div>
+<div>
+			<iframe src="https://ad6ff489a284a53b768ddf5d6dca9b08.us-east-1.aws.found.io/app/kibana#/dashboard/d46d2dc0-3520-11e7-9329-d9d2798d8207?embed=true&_g=()" height="10000" width="1350"></iframe>
+		</div>
+
+
+<!-- End Page Content -->
+</div>
+
+
+</body>
+</html>
